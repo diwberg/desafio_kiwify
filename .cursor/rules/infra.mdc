@@ -1,0 +1,62 @@
+---
+description: Use this information everytime needed change or create any file or directory
+alwaysApply: false
+---
+DIR -
+src/
+├── app/                          # Next.js App Router
+│   ├── (auth)/                  # Route groups for auth
+│   ├── (dashboard)/             # Route groups for admin dashboard
+│   ├── api/                     # API routes
+│   ├── globals.css              # Globals styles
+│   ├── layout.tsx               # Root layout
+│   └── page.tsx                 # Home page
+│
+├── components/                   #  Globals components/shared
+│   ├── ui/                      # shadcn/ui components
+│   ├── theme-provider.tsx       # Theme context
+│   ├── theme-toggle.tsx         # Dark/light toggle
+│   ├── loading-state.tsx        # Loading states
+│   ├── error-state.tsx          # Error states
+│   ├── empty-state.tsx          # Empty states
+│   └── data-table.tsx           # Reusable tables
+│
+├── modules/                      # Feature modules (Domain-driven)
+│   ├── auth/                    # Authentication module
+│   │   ├── ui/                  # Module components
+│   │   ├── server/              # Server actions/procedures
+│   │   ├── hooks/               # Hooks
+│   │   ├── types.ts             # Types
+│   │   └── schemas.ts           # Validations Zod
+│   └── [feature]/               # Modules
+│       ├── ui/
+│       │   ├── components/      # Specific components
+│       │   └── views/           # Module views/pages
+│       ├── server/
+│       │   └── procedures.ts    # tRPC procedures
+│       ├── hooks/               # Hooks
+│       ├── types.ts             # Specific types
+│       ├── schemas.ts           # Validations
+│       └── params.ts            # URL params/filters
+│
+├── lib/                         # Settings and utilities
+│   ├── utils.ts                 # Utility functions (cn, etc)
+│   ├── auth.ts                  # Better-auth config
+│   ├── auth-client.ts           # Auth client setup
+│   └── [service].ts             # Other settings
+│
+├── db/                          # Database layer
+│   ├── index.ts                 # Database connection
+│   ├── schema.ts                # Drizzle schemas
+│   └── schemas/                 # Schema for feature
+│
+├── trpc/                        # tRPC configuration
+│   ├── init.ts                  # tRPC initialization
+│   ├── server.tsx               # Server-side client
+│   ├── client.tsx               # Client-side setup
+│   ├── query-client.ts          # React Query config
+│   └── routers/
+│       └── _app.ts              # Main router
+│
+├── hooks/                       # Global hooks
+└── constants.ts                 # Constants globais

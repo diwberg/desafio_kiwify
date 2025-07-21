@@ -1,0 +1,25 @@
+---
+description: Use this information everytime needed Stack information used into application
+globs:
+alwaysApply: false
+---
+
+Core Framework
+Next.js 15+ (App Router)
+TypeScript
+React 19 with RSC (React Server Components)
+Tailwind CSS 4
+
+Backend & Database
+tRPC API type-safe
+PrismaORM
+SQLite
+better-auth
+
+Frontend & UI
+shadcn/ui (New York style)
+Lucide React
+React Query (@tanstack/react-query) state management
+React Hook Form + Zod
+Sonner to notify
+
