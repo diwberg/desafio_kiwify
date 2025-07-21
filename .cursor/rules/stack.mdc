@@ -1,9 +1,6 @@
 ---
-description: Use this information everytime needed Stack information used into application
-globs:
 alwaysApply: false
 ---
-
 Core Framework
 Next.js 15+ (App Router)
 TypeScript
