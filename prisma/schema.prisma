@@ -1,0 +1,119 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  cpf           String?   @unique
+  name          String
+  email         String   @unique
+  phone         String?
+  address       String?
+  city          String?
+  state         String?
+  zipCode       String?
+  // Campos para Better Auth
+  emailVerified Boolean  @default(false)
+  image         String?
+  role          String   @default("user") // "user" ou "admin"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relacionamento com propostas
+  proposals Proposal[]
+  // Relacionamentos Better Auth
+  sessions  Session[]
+  accounts  Account[]
+
+  banned     Boolean?
+  banReason  String?
+  banExpires DateTime?
+
+  @@map("users")
+}
+
+// Tabelas do Better Auth
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  impersonatedBy String?
+
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([identifier, value])
+  @@map("verifications")
+}
+
+model Proposal {
+  id                    String   @id @default(cuid())
+  number                String   @unique
+  propertyValue         Float
+  downPayment           Float
+  financedAmount        Float
+  term                  Int
+  monthlyPayment        Float
+  totalAmount           Float
+  totalInterest         Float
+  downPaymentPercentage String
+  signature             String // Base64 da assinatura
+  signedAt              DateTime
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relacionamento com usuário
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("proposals")
+}

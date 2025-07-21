@@ -226,7 +226,7 @@ export default function HomePage() {
                 <div className="space-y-2">
                   <div>
                     <a 
-                      href="/dashboard" 
+                      href="/login" 
                       className="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200 flex items-center justify-center md:justify-start gap-1"
                     >
                       <Calculator className="h-4 w-4" />

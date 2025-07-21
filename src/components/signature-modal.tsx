@@ -226,16 +226,68 @@ export function SignatureModal({ isOpen, onClose, proposalData, proposalNumber }
       yPosition += 8;
     });
 
-    // Assinatura
-    yPosition += 20;
+        // ====== RODAPÉ COM ASSINATURA DIGITAL ======
+    const footerHeight = 70;
+    const footerYStart = pageHeight - footerHeight;
+    
+    // Linha divisória superior do rodapé
+    pdf.setLineWidth(0.5);
+    pdf.setDrawColor(100, 100, 100); // Cor cinza
+    pdf.line(margin, footerYStart, pageWidth - margin, footerYStart);
+    
+    // Informações institucionais (lado esquerdo)
+    const leftSide = margin;
+    const leftYStart = footerYStart + 15;
+    
+    pdf.setFontSize(8);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(50, 50, 50);
+    pdf.text("CasaFácil Financiamentos", leftSide, leftYStart);
+    
+    pdf.setFontSize(7);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(80, 80, 80);
+    pdf.text(`Proposta Nº ${proposalNumber}`, leftSide, leftYStart + 8);
+    pdf.text(`Gerado em ${formatDate(currentDate)} às ${currentDate.toLocaleTimeString('pt-BR')}`, leftSide, leftYStart + 16);
+    pdf.text("Documento com validade jurídica - Lei 14.063/2020", leftSide, leftYStart + 24);
+    
+    // Assinatura digital (lado direito)
     if (signatureDataURL) {
-      pdf.text("ASSINATURA DIGITAL:", margin, yPosition);
-      yPosition += 10;
-      pdf.addImage(signatureDataURL, 'PNG', margin, yPosition, 100, 40);
-      yPosition += 45;
+      const signatureWidth = 90;
+      const signatureHeight = 35;
+      const signatureX = pageWidth - margin - signatureWidth - 10;
+      const signatureY = footerYStart + 8;
+      
+      // Título da assinatura
+      pdf.setFontSize(8);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(0, 0, 0);
+      pdf.text("ASSINATURA DIGITAL CERTIFICADA", signatureX, signatureY);
+      
+      // Caixa da assinatura com borda
+      pdf.setDrawColor(200, 200, 200);
+      pdf.setLineWidth(0.5);
+      pdf.rect(signatureX - 2, signatureY + 2, signatureWidth + 4, signatureHeight + 18);
+      
+      // Imagem da assinatura
+      pdf.addImage(signatureDataURL, 'PNG', signatureX, signatureY + 4, signatureWidth, signatureHeight);
+      
+      // Informações do signatário
+      const signatoryY = signatureY + signatureHeight + 8;
+      pdf.setFontSize(7);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(userData.name.toUpperCase(), signatureX, signatoryY);
+      
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(80, 80, 80);
+      pdf.text(`CPF: ${userData.cpf}`, signatureX, signatoryY + 6);
+      pdf.text(`${formatDate(currentDate)} - ${currentDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`, signatureX, signatoryY + 12);
     }
     
-    pdf.text(`Assinado digitalmente em ${formatDate(currentDate)}`, margin, yPosition);
+    // Reset das cores para o padrão
+    pdf.setTextColor(0, 0, 0);
+    pdf.setDrawColor(0, 0, 0);
 
     return pdf;
   };
