@@ -1,8 +1,9 @@
 /**
- * Script para criar usuário admin usando Better Auth
- * Execute: npx tsx src/scripts/create-admin-better-auth.ts
+ * Script para criar usuário admin usando Better Auth SDK
+ * Execute: npm run create-admin
  */
 
+import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 

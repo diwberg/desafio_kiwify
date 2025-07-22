@@ -42,14 +42,14 @@ export default function LoginPage() {
         onError: (ctx) => {
           // Handle the error
           if (ctx.error.status === 403) {
-            alert("Please verify your email address");
+            console.log("Please verify your email address");
           }
           //you can also show the original error message
-          alert(ctx.error.message);
+          console.log(ctx.error.message);
         },
       }
     )
-      console.log(result)
+      //console.log(result)
 
       if (result.error) {
         setError(result.error.message || "Email ou senha incorretos")

@@ -6,7 +6,12 @@
     "dev": "next dev -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "create-admin": "npx tsx src/scripts/create-admin-better-auth.ts",
+    "seed-data": "npx tsx src/scripts/seed-data.ts",
+    "db:reset": "npx prisma migrate reset --force",
+    "db:push": "npx prisma db push",
+    "db:generate": "npx prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
