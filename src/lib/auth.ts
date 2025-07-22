@@ -8,20 +8,21 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false
-  },
-  user: {
-    additionalFields: {
-      role: {
-        type: "string",
-        defaultValue: "user",
-        required: false
-      }
-    }
+    requireEmailVerification: false,
+    minPasswordLength: 6,
+    maxPasswordLength: 128
   },
   session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days
-    updateAge: 60 * 60 * 24 // 1 day
+    strategy: "database",
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    updateAge: 60 * 60 * 24, // 24 hours
+    include: {
+      role: true,
+      email: true,
+      name: true,
+      image: true,
+      emailVerified: true
+    }
   },
   secret: process.env.BETTER_AUTH_SECRET || process.env.JWT_SECRET || "your-secret-key-change-in-production"
 })

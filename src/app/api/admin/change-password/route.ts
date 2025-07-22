@@ -23,8 +23,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verificar se é admin
-    if (session.user.role !== 'admin') {
+    // Buscar usuário no banco para verificar role
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { role: true }
+    })
+
+    if (!user || user.role !== 'admin') {
       return NextResponse.json(
         { error: 'FORBIDDEN', message: 'Apenas administradores podem alterar senhas' },
         { status: 403 }

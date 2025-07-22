@@ -1,8 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
-//import { useSession, signIn } from "@/hooks/useBetterAuth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -19,13 +18,6 @@ export default function LoginPage() {
   const [error, setError] = useState("")
 
   const router = useRouter()
-  const { data: session, isPending } = authClient.useSession()
-
-  useEffect(() => {
-    if (session?.user) {
-      router.push("/admin")
-    }
-  }, [session, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,19 +29,9 @@ export default function LoginPage() {
         email,
         password,
         callbackURL: "/admin"
-      },
-      {
-        onError: (ctx) => {
-          // Handle the error
-          if (ctx.error.status === 403) {
-            console.log("Please verify your email address");
-          }
-          //you can also show the original error message
-          console.log(ctx.error.message);
-        },
-      }
-    )
-      //console.log(result)
+      })
+
+      console.log(result)
 
       if (result.error) {
         setError(result.error.message || "Email ou senha incorretos")
@@ -62,21 +44,6 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false)
     }
-  }
-
-  if (isPending) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Verificando autenticação...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (session?.user) {
-    return null // Já redirecionando
   }
 
   return (
@@ -181,4 +148,4 @@ export default function LoginPage() {
       </div>
     </div>
   )
-} 
+}

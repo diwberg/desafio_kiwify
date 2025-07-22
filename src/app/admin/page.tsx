@@ -78,27 +78,10 @@ export default function AdminPage() {
   const [showChangePassword, setShowChangePassword] = useState(false)
 
   const router = useRouter()
-  const { data: session, isPending } = authClient.useSession()
-
-  // Verificar se usuário está autenticado e é admin
-  useEffect(() => {
-    if (!isPending && !session?.user) {
-      router.push("/login")
-      return
-    }
-
-    // Verificar se é admin
-    if (session?.user && (session.user as any).role !== "admin") {
-      router.push("/")
-      return
-    }
-  }, [session, isPending, router])
 
   // Carregar dados
   useEffect(() => {
     const loadData = async () => {
-      if (!session?.user || (session.user as any).role !== "admin") return
-
       try {
         setIsLoading(true)
 
@@ -124,10 +107,8 @@ export default function AdminPage() {
       }
     }
 
-    if (session?.user && (session.user as any).role === "admin") {
-      loadData()
-    }
-  }, [session])
+    loadData()
+  }, [])
 
   const handleSignOut = async () => {
     await authClient.signOut()
@@ -135,35 +116,13 @@ export default function AdminPage() {
   }
 
   // Estados de loading
-  if (isPending || (!session?.user)) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Verificando autenticação...</p>
+          <p className="mt-4 text-gray-600">Carregando dados...</p>
         </div>
-      </div>
-    )
-  }
-
-  // Verificar se é admin
-  if ((session.user as any).role !== "admin") {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center">
-        <Card className="w-full max-w-md text-center">
-          <CardHeader>
-            <Shield className="h-12 w-12 text-red-600 mx-auto mb-4" />
-            <CardTitle className="text-red-800">Acesso Negado</CardTitle>
-            <CardDescription>
-              Você não tem permissão para acessar esta área.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={() => router.push("/")} className="w-full">
-              Voltar ao Início
-            </Button>
-          </CardContent>
-        </Card>
       </div>
     )
   }
@@ -179,7 +138,7 @@ export default function AdminPage() {
               Painel Administrativo
             </h1>
             <p className="text-gray-600 mt-2">
-              Bem-vindo, {session.user.name || session.user.email}
+              Bem-vindo ao sistema de administração
             </p>
           </div>
           
@@ -222,12 +181,12 @@ export default function AdminPage() {
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-gray-500" />
                 <span className="text-sm">
-                  <span className="font-medium">Email:</span> {session.user.email}
+                  <span className="font-medium">Email:</span> admin@casafacil.com.br
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="default" className="bg-green-100 text-green-800">
-                  {((session.user as any).role || 'USER').toUpperCase()}
+                  ADMIN
                 </Badge>
               </div>
               <div className="flex items-center gap-2">
@@ -339,4 +298,4 @@ export default function AdminPage() {
       />
     </div>
   )
-} 
+}
