@@ -6,3 +6,8 @@ Nessa tela final deve ter um botão de “aceitar proposta”, onde abrirá um P
 Também crie um mini painel de administração que exibe as submissões. As submissões deverão ficar salvas em algum tipo de banco de dados. 
 Tome cuidado especial em todas as validações, máscaras, formatação de valores, etc.
 Utilize TailwindCSS.
+
+- criar autenticação via banco
+- migrar o banco para postgres
+- preparar para deploy
+- 

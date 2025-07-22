@@ -1,14 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useSimpleAuth } from "@/hooks/useSimpleAuth"
+//import { useSession, signIn } from "@/hooks/useBetterAuth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Home, Mail, Lock, Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
+import { authClient } from "@/lib/auth-client"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -16,128 +17,167 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  
-  const router = useRouter()
-  const { isAuthenticated, login } = useSimpleAuth()
 
-  // Se já estiver logado, redirecionar
-  if (isAuthenticated) {
-    router.push("/admin")
-    return null
-  }
+  const router = useRouter()
+  const { data: session, isPending } = authClient.useSession()
+
+  useEffect(() => {
+    if (session?.user) {
+      router.push("/admin")
+    }
+  }, [session, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
 
-    const result = await login(email, password)
+    try {
+      const result = await authClient.signIn.email({
+        email,
+        password,
+        callbackURL: "/admin"
+      },
+      {
+        onError: (ctx) => {
+          // Handle the error
+          if (ctx.error.status === 403) {
+            alert("Please verify your email address");
+          }
+          //you can also show the original error message
+          alert(ctx.error.message);
+        },
+      }
+    )
+      console.log(result)
 
-    if (result.success) {
-      router.push("/admin")
-    } else {
-      setError(result.message || "Email ou senha incorretos")
+      if (result.error) {
+        setError(result.error.message || "Email ou senha incorretos")
+      } else {
+        router.push("/admin")
+      }
+    } catch (err) {
+      setError("Erro de conexão. Tente novamente.")
+      console.error("Erro no login:", err)
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    setIsLoading(false)
+  if (isPending) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Verificando autenticação...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (session?.user) {
+    return null // Já redirecionando
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
-        {/* Header */}
-        <div className="text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6">
-            <Home className="h-5 w-5" />
-            <span className="font-semibold">Voltar ao Início</span>
+      <div className="w-full max-w-md">
+        {/* Botão Home */}
+        <div className="mb-4">
+          <Link href="/">
+            <Button variant="ghost" className="flex items-center gap-2 text-gray-600 hover:text-gray-800">
+              <Home className="h-4 w-4" />
+              Voltar ao início
+            </Button>
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Acesso Administrativo
-          </h1>
-          <p className="text-gray-600">
-            Digite suas credenciais para acessar o painel administrativo
-          </p>
         </div>
 
-        {/* Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">
-              Login Administrativo
+        <Card className="w-full shadow-xl border-0">
+          <CardHeader className="space-y-1 pb-6">
+            <CardTitle className="text-2xl font-bold text-center text-gray-800">
+              Acesso Administrativo
             </CardTitle>
-            <CardDescription>
-              Apenas administradores autorizados podem acessar
+            <CardDescription className="text-center text-gray-600">
+              Entre com suas credenciais para acessar o painel administrativo
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          
+          <CardContent className="space-y-4">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
+                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
                   Email
                 </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@casafacil.com.br"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="admin@casafacil.com.br"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10 h-12"
+                    required
+                  />
+                </div>
               </div>
-
+              
               <div className="space-y-2">
-                <Label htmlFor="password" className="flex items-center gap-2">
-                  <Lock className="h-4 w-4" />
+                <Label htmlFor="password" className="text-sm font-medium text-gray-700">
                   Senha
                 </Label>
                 <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
+                    placeholder="Digite sua senha"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 pr-10 h-12"
                     required
                   />
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
                     onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
                     ) : (
                       <Eye className="h-4 w-4" />
                     )}
-                  </Button>
+                  </button>
                 </div>
               </div>
 
               {error && (
-                <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
                   {error}
                 </div>
               )}
-
-              <Button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700"
+              
+              <Button 
+                type="submit" 
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium"
                 disabled={isLoading}
               >
-                {isLoading ? "Verificando..." : "Entrar no Dashboard"}
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Entrando...
+                  </div>
+                ) : (
+                  "Entrar no Sistema"
+                )}
               </Button>
             </form>
+
+            <div className="text-center text-sm text-gray-500 mt-6">
+              <p>CasaFácil - Sistema de Financiamento Imobiliário</p>
+            </div>
           </CardContent>
         </Card>
-
-        {/* Informações adicionais */}
-        <div className="text-center text-xs text-gray-500">
-          <p>Sistema restrito a administradores autorizados</p>
-          <p className="mt-1">Contate o suporte se você esqueceu suas credenciais</p>
-        </div>
       </div>
     </div>
   )
