@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SignatureModal } from "@/components/signature-modal";
@@ -30,7 +30,7 @@ interface ProposalData {
   downPaymentPercentage: string;
 }
 
-export default function PropostaPage() {
+function PropostaContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [proposalData, setProposalData] = useState<ProposalData | null>(null);
@@ -319,5 +319,25 @@ export default function PropostaPage() {
         proposalNumber={proposalNumber}
       />
     </div>
+  );
+}
+
+// Loading component
+function PropostaLoading() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="text-center">
+        <Calculator className="h-12 w-12 text-blue-600 animate-spin mx-auto mb-4" />
+        <p className="text-gray-600">Carregando proposta...</p>
+      </div>
+    </div>
+  );
+}
+
+export default function PropostaPage() {
+  return (
+    <Suspense fallback={<PropostaLoading />}>
+      <PropostaContent />
+    </Suspense>
   );
 } 
