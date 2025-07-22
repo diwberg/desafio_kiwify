@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { authClient } from "@/lib/auth-client"
+import { signOut, useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -78,9 +78,18 @@ export default function AdminPage() {
   const [showChangePassword, setShowChangePassword] = useState(false)
 
   const router = useRouter()
+  const { data: session, status } = useSession()
+
+  // Redireciona se não estiver autenticado
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login")
+    }
+  }, [status, router])
 
   // Carregar dados
   useEffect(() => {
+    if (status !== "authenticated") return;
     const loadData = async () => {
       try {
         setIsLoading(true)
@@ -108,11 +117,10 @@ export default function AdminPage() {
     }
 
     loadData()
-  }, [])
+  }, [status])
 
   const handleSignOut = async () => {
-    await authClient.signOut()
-    router.push("/")
+    await signOut({ callbackUrl: "/login" })
   }
 
   // Estados de loading

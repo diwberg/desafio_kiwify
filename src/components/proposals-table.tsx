@@ -9,13 +9,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ProposalWithUser } from "@/types/database"
+import { ProposalWithUserSafe } from "@/types/database"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { Eye, FileText, CalendarDays, DollarSign } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface ProposalsTableProps {
-  proposals: ProposalWithUser[]
+  proposals: ProposalWithUserSafe[]
   isLoading?: boolean
 }
 

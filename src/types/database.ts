@@ -42,6 +42,11 @@ export type ProposalWithUser = Prisma.ProposalGetPayload<{
   include: { user: true }
 }>
 
+// Tipo seguro para frontend (sem password)
+export type ProposalWithUserSafe = Omit<ProposalWithUser, 'user'> & {
+  user: Omit<ProposalWithUser['user'], 'password'>
+}
+
 // Tipos para filtros
 export type UserFilter = Prisma.UserWhereInput
 export type ProposalFilter = Prisma.ProposalWhereInput

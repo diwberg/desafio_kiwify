@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { DatabaseService } from '@/services/database'
+import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
 // Schema de validação para a proposta
@@ -64,7 +64,21 @@ async function handlePOST(request: NextRequest) {
     }
 
     // Salvar no banco de dados
-    const savedProposal = await DatabaseService.createProposalWithUser(proposalData)
+    // const savedProposal = await DatabaseService.createProposalWithUser(proposalData)
+    // Nova lógica Prisma:
+    // 1. Verifica se o usuário existe pelo CPF, senão cria
+    let user = await prisma.user.findUnique({ where: { cpf: proposalData.user.cpf } })
+    if (!user) {
+      user = await prisma.user.create({ data: { ...proposalData.user, password: 'dummy' } })
+    }
+    // 2. Cria a proposta vinculada ao usuário
+    const savedProposal = await prisma.proposal.create({
+      data: {
+        ...proposalData.proposal,
+        userId: user.id,
+      },
+      include: { user: true },
+    })
 
     // Log para auditoria
     console.log(`Proposta ${savedProposal.number} criada para usuário ${savedProposal.user.cpf}`)
@@ -118,7 +132,9 @@ async function handleGET(request: NextRequest) {
 
     if (cpf) {
       // Buscar propostas de um usuário específico
-      const proposals = await DatabaseService.listProposalsByUser(cpf)
+      // const proposals = await DatabaseService.listProposalsByUser(cpf)
+      const user = await prisma.user.findUnique({ where: { cpf: cpf.replace(/\D/g, '') }, include: { proposals: true } })
+      const proposals = user?.proposals || []
       return NextResponse.json({
         success: true,
         data: proposals,
@@ -127,21 +143,22 @@ async function handleGET(request: NextRequest) {
     } else {
       // Listar todas as propostas com paginação
       const skip = (page - 1) * limit
-      const proposals = await DatabaseService.listProposals(
-        {},
-        { createdAt: 'desc' }
-      )
-      
-      const paginatedProposals = proposals.slice(skip, skip + limit)
-      //console.log(paginatedProposals)
+      // const proposals = await DatabaseService.listProposals({}, { createdAt: 'desc' })
+      const proposals = await prisma.proposal.findMany({
+        orderBy: { createdAt: 'desc' },
+        include: { user: true },
+        skip,
+        take: limit,
+      })
+      // const paginatedProposals = proposals.slice(skip, skip + limit)
       return NextResponse.json({
         success: true,
-        data: paginatedProposals,
+        data: proposals,
         pagination: {
           page,
           limit,
-          total: proposals.length,
-          totalPages: Math.ceil(proposals.length / limit),
+          total: await prisma.proposal.count(),
+          totalPages: Math.ceil((await prisma.proposal.count()) / limit),
         },
       })
     }

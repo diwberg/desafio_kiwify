@@ -4,6 +4,7 @@ CREATE TABLE "users" (
     "cpf" TEXT,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
     "phone" TEXT,
     "address" TEXT,
     "city" TEXT,
